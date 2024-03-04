@@ -1,0 +1,21 @@
+# Normalize line endings for text files
+* text=auto eol=lf
+
+# Python
+*.py text diff=python
+
+# Treat notebooks as text but do not attempt line-ending conversion
+*.ipynb text eol=lf linguist-language=Jupyter
+
+# Binary assets: never diff / never convert EOL
+*.xlsx binary
+*.xls  binary
+*.pkl  binary
+*.pdf  binary
+*.pptx binary
+*.png  binary
+*.jpg  binary
+
+# Keep GitHub language stats focused on the analysis code, not vendored docs
+docs/**   linguist-documentation
+Data/**   linguist-vendored
