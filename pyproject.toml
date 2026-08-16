@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "equity-factor-timing"
+version = "1.0.0"
+description = "Dynamic allocation across S&P 500 equity factors driven by machine-learning market-regime detection."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Santo Mancuso" }]
+
+# Runtime dependencies. Exact pins live in requirements.txt (used for the
+# notebook runtime); keep the two in sync when bumping versions.
+dependencies = [
+    "numpy==2.0.0",
+    "pandas==2.2.2",
+    "scipy==1.13.1",
+    "openpyxl==3.1.4",
+    "scikit-learn==1.5.0",
+    "imbalanced-learn==0.12.3",
+    "hyperopt==0.2.7",
+    "statsmodels==0.14.2",
+    "joblib==1.4.2",
+    "Riskfolio-Lib==6.2.3",
+    "matplotlib==3.9.0",
+    "seaborn==0.13.2",
+    "tabulate==0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "pre-commit>=3.7",
+    "nbstripout>=0.7",
+]
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/W: pycodestyle, F: pyflakes, I: isort, UP: pyupgrade
+select = ["E", "F", "I", "UP"]
+# The metrics modules are a faithful port of the original notebook code, whose
+# local variables intentionally shadow their function names; don't fight that.
+ignore = ["E741"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
