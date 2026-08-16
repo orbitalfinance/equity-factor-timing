@@ -1,5 +1,7 @@
 # **Equity Factor Timing**: allocazione dinamica tra fattori azionari S&P 500 guidata da algoritmi di Machine Learning
 
+[![CI](https://github.com/orbitalfinance/Project-Work/actions/workflows/ci.yml/badge.svg)](https://github.com/orbitalfinance/Project-Work/actions/workflows/ci.yml)
+
 Un sistema che riconosce il **regime di rischio** del mercato e, in base ad esso, sceglie **quale fattore azionario** (value, growth, momentum, low-volatility, quality, small-cap) sovrappesare, costruendo un portafoglio ribilanciato mensilmente e confrontato con benchmark classici.
 
 ## A cosa serve
@@ -28,20 +30,30 @@ Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un mod
    pip install -r requirements.txt
    ```
 
-3. **Avvia Jupyter ed esegui il notebook principale.** Va eseguito *dalla cartella* `Code/`, perché carica i dati da `../Data/` e i modelli `.pkl` dalla directory corrente.
+3. **Avvia Jupyter ed esegui il notebook principale.** Il notebook individua da solo la radice del progetto (risalendo le cartelle finché trova `.git`/`requirements.txt`/`pyproject.toml`), quindi puoi lanciarlo da qualsiasi directory interna al repository.
    ```bash
-   cd Code
-   jupyter lab equity_factor_timing_final.ipynb
+   jupyter lab Code/equity_factor_timing_final.ipynb
    ```
    Esegui le celle in ordine: le sezioni di *training* più pesanti sono disattivate dal magic `%%skip` e i modelli già addestrati vengono ricaricati dai file `.pkl`. Per riaddestrare da zero, rimuovi `%%skip` dalle celle interessate. I dati necessari sono già inclusi in `Data/`.
+
+4. **(Opzionale) Sviluppo: test, lint e hook anti-segreto.**
+   ```bash
+   pip install -e ".[dev]"
+   pytest -q                 # esegue la suite in tests/
+   ruff check src tests      # lint + ordinamento import
+   pre-commit install        # blocca segreti e file troppo grandi a ogni commit
+   ```
 
 ### Mappa del repository
 
 | File / cartella | Scopo |
 | --- | --- |
 | `Code/equity_factor_timing_final.ipynb` | **Notebook principale**: pipeline completa in 3 parti (regimi → fattori → portafoglio). Entry point del progetto. |
-| `Code/performance_metrics_ret.py` | Metriche di performance calcolate **dai rendimenti** (ann. return/vol, Sharpe, max drawdown, Calmar); importato dal notebook come `pm`. |
-| `Code/performance_metrics.py` | Variante delle stesse metriche calcolate **dall'equity curve**. |
+| `src/paths.py` | Radici del progetto (`PROJECT_ROOT`, `DATA_DIR`, `MODELS_DIR`) indipendenti dalla cartella di avvio. |
+| `src/metrics.py` | Metriche di performance **dai rendimenti** (importato dal notebook come `pm`). |
+| `src/equity_metrics.py` | Variante delle stesse metriche calcolate **dall'equity curve**. |
+| `src/turbulence.py` | Indice di **turbolenza finanziaria** di Kritzman-Li (feature del classificatore di regime). |
+| `tests/` | Suite `pytest` per metriche e turbolenza. |
 | `Code/best_ho_model_new2.pkl` | Modello di **stadio 1** (stacking ottimizzato con HyperOpt) per la classificazione del regime di mercato. |
 | `Code/best_rf_model_new2.pkl` | Random Forest di riferimento per la classificazione del regime. |
 | `Code/best_normal_factors_new2.pkl` | Modello di **stadio 2** per la selezione del fattore vincente nel regime *normale*. |
@@ -51,15 +63,19 @@ Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un mod
 | `Data/S&P_sectors_bb.xlsx` | Serie storiche settoriali S&P (input per la turbolenza finanziaria). |
 | `Data/Data_Treasuries.xlsx` | Rendimenti Treasury USA a 1, 2 e 10 anni. |
 | `Data/Data_Macro.xlsx` | Variabili macroeconomiche usate come feature del classificatore di regime. |
+| `docs/METHODOLOGY.md` | Sintesi tecnica della metodologia (schema pipeline, feature, metriche). |
 | `docs/MANCUSO_Santo_PW.pdf` | Relazione completa del Project Work. |
 | `docs/MANCUSO_Santo_Discussione_15min.pptx` | Presentazione di discussione (15 min). |
 | `docs/equity_factor_timing.pdf` | Paper/estratto sul factor timing di riferimento. |
 | `requirements.txt` | Dipendenze Python pinnate alle versioni usate per i risultati. |
+| `pyproject.toml` | Metadati del progetto e configurazione di `ruff`/`pytest`. |
+| `.pre-commit-config.yaml` | Hook anti-segreto e di lint eseguiti prima di ogni commit. |
+| `.github/workflows/ci.yml` | CI GitHub Actions: lint e test a ogni push/PR. |
 
 ## Note / Vincoli
 
 - **Ordine di esecuzione**: il notebook è **stateful**. Esegui le celle dall'alto verso il basso; saltarne alcune lascia variabili non definite.
-- **Percorsi relativi**: il notebook assume di girare da `Code/`. Carica i dati da `../Data/` e i modelli `.pkl` dalla directory corrente; non spostare i file `.pkl` fuori da `Code/` senza aggiornare i path.
+- **Percorsi**: gestiti da `src/paths.py` in modo indipendente dalla cartella di avvio; i dati restano in `Data/`, i modelli `.pkl` in `Code/`. Il notebook aggiunge automaticamente la radice del progetto a `sys.path` per importare `src`.
 - **Dati con licenza**: i file in `Data/` derivano da **Refinitiv Eikon / S&P / Bloomberg**. Sono inclusi per riproducibilità didattica; verifica i termini di licenza prima di riutilizzarli o ridistribuirli in altri contesti.
 - **Ambiente**: ricrea l'ambiente con `requirements.txt`; non versionare il virtualenv (è già escluso in `.gitignore`).
 - **Riproducibilità dei modelli**: i `.pkl` riflettono l'addestramento originale. Riaddestrando (rimuovendo `%%skip`) i risultati numerici possono variare leggermente per via di seed e versioni delle librerie.
