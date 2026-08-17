@@ -68,7 +68,6 @@ The project rests on a **two-stage ML architecture**. *First stage*: an **unsupe
 | `docs/METHODOLOGY.md` | Technical summary of the methodology (pipeline diagram, features, metrics). |
 | `docs/MANCUSO_Santo_PW.pdf` | Full Project Work report (in Italian). |
 | `docs/MANCUSO_Santo_Discussione_15min.pptx` | Discussion slides, 15 min (in Italian). |
-| `docs/equity_factor_timing.pdf` | Reference paper/extract on factor timing. |
 | `requirements.txt` | Python dependencies pinned to the versions used to produce the results. |
 | `pyproject.toml` | Project metadata and `ruff`/`pytest` configuration. |
 | `.pre-commit-config.yaml` | Secret-scanning and lint hooks run before every commit. |
@@ -81,6 +80,18 @@ The project rests on a **two-stage ML architecture**. *First stage*: an **unsupe
 - **Licensed data**: the files in `Data/` are derived from **Refinitiv Eikon / S&P / Bloomberg**. They are included for educational reproducibility; check the licence terms before reusing or redistributing them in other contexts.
 - **Environment**: recreate the environment from `requirements.txt`; do not version the virtualenv (it is already excluded in `.gitignore`).
 - **Model reproducibility**: the `.pkl` files reflect the original training run. Retraining (by removing `%%skip`) may shift the numeric results slightly because of seeds and library versions.
+
+## Reference paper
+
+The two-stage architecture implemented here follows the approach proposed in:
+
+> DiCiurcio, K. J., Wu, B., Xu, F., Rodemer, S., and Wang, Q. (2024).
+> "Equity Factor Timing: A Two-Stage Machine Learning Approach."
+> *The Journal of Portfolio Management*, 50 (3).
+> https://www.pm-research.com/content/iijpormgmt/50/3
+
+The article is paywalled and its licence does not permit redistribution, so it
+is **not** included in this repository — please obtain it from the publisher.
 
 ## Credits / Provenance
 
