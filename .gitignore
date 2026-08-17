@@ -46,3 +46,13 @@ Thumbs.db
 # Local-only working notes (not part of the published repo)
 # ------------------------------------------------------------------
 MIGLIORAMENTI.md
+
+# ------------------------------------------------------------------
+# Third-party copyrighted material — must never be committed
+# ------------------------------------------------------------------
+# The DiCiurcio et al. (2024) reference paper is a paywalled Journal of
+# Portfolio Management article. Its licence forbids posting it electronically,
+# and the downloaded copy is watermarked with the name of the person who
+# downloaded it. A personal copy may live here locally; the README cites the
+# paper by DOI instead. See docs/METHODOLOGY.md.
+docs/equity_factor_timing.pdf

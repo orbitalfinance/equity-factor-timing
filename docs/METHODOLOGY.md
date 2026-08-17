@@ -6,6 +6,12 @@ Technical summary of the **Equity Factor Timing** pipeline. For the full detail
 see the report in [MANCUSO_Santo_PW.pdf](MANCUSO_Santo_PW.pdf) (in Italian); for
 the step-by-step run see the notebook in `Code/`.
 
+The two-stage design follows DiCiurcio, K. J., Wu, B., Xu, F., Rodemer, S., and
+Wang, Q. (2024), "Equity Factor Timing: A Two-Stage Machine Learning Approach",
+*The Journal of Portfolio Management*, 50 (3),
+<https://www.pm-research.com/content/iijpormgmt/50/3>. The article is paywalled
+and cannot be redistributed, so it is not included in this repository.
+
 ## Pipeline diagram
 
 ```

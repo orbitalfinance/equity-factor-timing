@@ -68,7 +68,6 @@ Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un mod
 | `docs/METHODOLOGY.it.md` | Sintesi tecnica della metodologia (schema pipeline, feature, metriche). |
 | `docs/MANCUSO_Santo_PW.pdf` | Relazione completa del Project Work. |
 | `docs/MANCUSO_Santo_Discussione_15min.pptx` | Presentazione di discussione (15 min). |
-| `docs/equity_factor_timing.pdf` | Paper/estratto sul factor timing di riferimento. |
 | `requirements.txt` | Dipendenze Python pinnate alle versioni usate per i risultati. |
 | `pyproject.toml` | Metadati del progetto e configurazione di `ruff`/`pytest`. |
 | `.pre-commit-config.yaml` | Hook anti-segreto e di lint eseguiti prima di ogni commit. |
@@ -81,6 +80,18 @@ Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un mod
 - **Dati con licenza**: i file in `Data/` derivano da **Refinitiv Eikon / S&P / Bloomberg**. Sono inclusi per riproducibilità didattica; verifica i termini di licenza prima di riutilizzarli o ridistribuirli in altri contesti.
 - **Ambiente**: ricrea l'ambiente con `requirements.txt`; non versionare il virtualenv (è già escluso in `.gitignore`).
 - **Riproducibilità dei modelli**: i `.pkl` riflettono l'addestramento originale. Riaddestrando (rimuovendo `%%skip`) i risultati numerici possono variare leggermente per via di seed e versioni delle librerie.
+
+## Paper di riferimento
+
+L'architettura a due stadi implementata qui segue l'approccio proposto in:
+
+> DiCiurcio, K. J., Wu, B., Xu, F., Rodemer, S., e Wang, Q. (2024).
+> "Equity Factor Timing: A Two-Stage Machine Learning Approach."
+> *The Journal of Portfolio Management*, 50 (3).
+> https://www.pm-research.com/content/iijpormgmt/50/3
+
+L'articolo è ad accesso a pagamento e la sua licenza non ne consente la
+ridistribuzione: **non** è incluso in questo repository, va richiesto all'editore.
 
 ## Crediti / Provenienza
 
