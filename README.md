@@ -1,6 +1,6 @@
 # **Equity Factor Timing**: allocazione dinamica tra fattori azionari S&P 500 guidata da algoritmi di Machine Learning
 
-[![CI](https://github.com/orbitalfinance/Project-Work/actions/workflows/ci.yml/badge.svg)](https://github.com/orbitalfinance/Project-Work/actions/workflows/ci.yml)
+[![CI](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml/badge.svg)](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml)
 
 Un sistema che riconosce il **regime di rischio** del mercato e, in base ad esso, sceglie **quale fattore azionario** (value, growth, momentum, low-volatility, quality, small-cap) sovrappesare, costruendo un portafoglio ribilanciato mensilmente e confrontato con benchmark classici.
 
@@ -19,8 +19,8 @@ Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un mod
 
 1. **Clona il repository e posizionati nella cartella.**
    ```bash
-   git clone https://github.com/orbitalfinance/Project-Work.git
-   cd Project-Work
+   git clone https://github.com/orbitalfinance/equity-factor-timing.git
+   cd equity-factor-timing
    ```
 
 2. **Crea l'ambiente e installa le dipendenze** (Python 3.12).
