@@ -1,89 +1,91 @@
-# **Equity Factor Timing**: allocazione dinamica tra fattori azionari S&P 500 guidata da algoritmi di Machine Learning
+**English** | [Italiano](README.it.md)
+
+# **Equity Factor Timing**: machine-learning-driven dynamic allocation across S&P 500 equity factors
 
 [![CI](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml/badge.svg)](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml)
 
-Un sistema che riconosce il **regime di rischio** del mercato e, in base ad esso, sceglie **quale fattore azionario** (value, growth, momentum, low-volatility, quality, small-cap) sovrappesare, costruendo un portafoglio ribilanciato mensilmente e confrontato con benchmark classici.
+A system that identifies the market's **risk regime** and, based on it, picks **which equity factor** (value, growth, momentum, low-volatility, quality, small-cap) to overweight, building a monthly-rebalanced portfolio benchmarked against classic alternatives.
 
-## A cosa serve
+## What it is for
 
-- **Timing dei fattori**: capire quale stile azionario tende a vincere in ciascuna fase di mercato, invece di puntare su un solo fattore statico.
-- **Rilevamento dei regimi di mercato**: distinguere fasi *normali* da fasi di *correzione* a partire dai drawdown e da variabili macro.
-- **Backtest di strategie**: confrontare un portafoglio *factor-timing* con S&P 500 buy-and-hold, equally-weighted e risk-parity, con metriche di performance standardizzate.
-- **Base di ricerca / didattica**: pipeline end-to-end (dati → clustering → classificazione → allocazione → backtest) riutilizzabile e ispezionabile in un unico notebook.
+- **Factor timing**: work out which equity style tends to win in each market phase, instead of betting on a single static factor.
+- **Market regime detection**: tell *normal* phases from *correction* phases using drawdowns and macroeconomic variables.
+- **Strategy backtesting**: compare a *factor-timing* portfolio against S&P 500 buy-and-hold, equally-weighted and risk-parity, using standardised performance metrics.
+- **Research / teaching base**: an end-to-end pipeline (data → clustering → classification → allocation → backtest) that is reusable and inspectable in a single notebook.
 
-## Idea centrale (leggere prima)
+## Core idea (read this first)
 
-Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un modello di **clustering non supervisionato** (K-means sui drawdown mensili a 3 mesi dell'S&P 500) etichetta ogni mese come regime *normale* o di *correzione*; un **classificatore supervisionato** (Random Forest / Naive Bayes / SVC combinati in uno **stacking** ottimizzato con **HyperOpt**) impara poi a prevedere quel regime a partire da variabili **macroeconomiche** e dalla **turbolenza finanziaria** di Kritzman-Li. *Secondo stadio*: per ciascun regime un **Random Forest dedicato** stima la probabilità che ogni fattore sia il *vincente* del mese successivo. Queste probabilità diventano i **pesi** di un portafoglio ribilanciato mensilmente, la cui equity curve viene misurata con rendimento annuo, volatilità, **Sharpe**, **max drawdown** e **Calmar** e confrontata con i benchmark. In breve: *prima capisci in che mondo sei, poi scegli lo stile giusto per quel mondo.*
+The project rests on a **two-stage ML architecture**. *First stage*: an **unsupervised clustering** model (K-means over the S&P 500's monthly 3-month drawdowns) labels each month as a *normal* or *correction* regime; a **supervised classifier** (Random Forest / Naive Bayes / SVC combined into a **stacking** model tuned with **HyperOpt**) then learns to predict that regime from **macroeconomic** variables and Kritzman-Li **financial turbulence**. *Second stage*: for each regime, a **dedicated Random Forest** estimates the probability that each factor will be next month's *winner*. Those probabilities become the **weights** of a monthly-rebalanced portfolio, whose equity curve is measured with annual return, volatility, **Sharpe**, **max drawdown** and **Calmar**, and compared against the benchmarks. In short: *first work out which world you are in, then pick the right style for that world.*
 
-## Come usarlo
+## How to use it
 
-1. **Clona il repository e posizionati nella cartella.**
+1. **Clone the repository and change into it.**
    ```bash
    git clone https://github.com/orbitalfinance/equity-factor-timing.git
    cd equity-factor-timing
    ```
 
-2. **Crea l'ambiente e installa le dipendenze** (Python 3.12).
+2. **Create the environment and install the dependencies** (Python 3.12).
    ```bash
    python -m venv .venv
    source .venv/bin/activate        # Windows: .venv\Scripts\activate
    pip install -r requirements.txt
    ```
 
-3. **Avvia Jupyter ed esegui il notebook principale.** Il notebook individua da solo la radice del progetto (risalendo le cartelle finché trova `.git`/`requirements.txt`/`pyproject.toml`), quindi puoi lanciarlo da qualsiasi directory interna al repository.
+3. **Start Jupyter and run the main notebook.** The notebook locates the project root on its own (walking up the directory tree until it finds `.git`/`requirements.txt`/`pyproject.toml`), so you can launch it from any directory inside the repository.
    ```bash
    jupyter lab Code/equity_factor_timing_final.ipynb
    ```
-   Esegui le celle in ordine: le sezioni di *training* più pesanti sono disattivate dal magic `%%skip` e i modelli già addestrati vengono ricaricati dai file `.pkl`. Per riaddestrare da zero, rimuovi `%%skip` dalle celle interessate. I dati necessari sono già inclusi in `Data/`.
+   Run the cells in order: the heavier *training* sections are disabled by the `%%skip` magic and the already-trained models are reloaded from the `.pkl` files. To retrain from scratch, remove `%%skip` from the relevant cells. All required data is already included in `Data/`.
 
-4. **(Opzionale) Sviluppo: test, lint e hook anti-segreto.**
+4. **(Optional) Development: tests, lint and secret-scanning hooks.**
    ```bash
    pip install -e ".[dev]"
-   pytest -q                 # esegue la suite in tests/
-   ruff check src tests      # lint + ordinamento import
-   pre-commit install        # blocca segreti e file troppo grandi a ogni commit
+   pytest -q                 # runs the suite in tests/
+   ruff check src tests      # lint + import sorting
+   pre-commit install        # blocks secrets and oversized files on every commit
    ```
 
-### Mappa del repository
+### Repository map
 
-| File / cartella | Scopo |
+| File / folder | Purpose |
 | --- | --- |
-| `Code/equity_factor_timing_final.ipynb` | **Notebook principale**: pipeline completa in 3 parti (regimi → fattori → portafoglio). Entry point del progetto. |
-| `src/paths.py` | Radici del progetto (`PROJECT_ROOT`, `DATA_DIR`, `MODELS_DIR`) indipendenti dalla cartella di avvio. |
-| `src/metrics.py` | Metriche di performance **dai rendimenti** (importato dal notebook come `pm`). |
-| `src/equity_metrics.py` | Variante delle stesse metriche calcolate **dall'equity curve**. |
-| `src/turbulence.py` | Indice di **turbolenza finanziaria** di Kritzman-Li (feature del classificatore di regime). |
-| `tests/` | Suite `pytest` per metriche e turbolenza. |
-| `Code/best_ho_model_new2.pkl` | Modello di **stadio 1** (stacking ottimizzato con HyperOpt) per la classificazione del regime di mercato. |
-| `Code/best_rf_model_new2.pkl` | Random Forest di riferimento per la classificazione del regime. |
-| `Code/best_normal_factors_new2.pkl` | Modello di **stadio 2** per la selezione del fattore vincente nel regime *normale*. |
-| `Code/best_correction_factors_new2.pkl` | Modello di **stadio 2** per la selezione del fattore vincente nel regime di *correzione*. |
-| `Data/SP500.xlsx` | Serie storica prezzi dell'indice S&P 500. |
-| `Data/S&P_factors.xlsx` | Serie storiche dei 6 indici fattoriali S&P 500. |
-| `Data/S&P_sectors_bb.xlsx` | Serie storiche settoriali S&P (input per la turbolenza finanziaria). |
-| `Data/Data_Treasuries.xlsx` | Rendimenti Treasury USA a 1, 2 e 10 anni. |
-| `Data/Data_Macro.xlsx` | Variabili macroeconomiche usate come feature del classificatore di regime. |
-| `docs/METHODOLOGY.md` | Sintesi tecnica della metodologia (schema pipeline, feature, metriche). |
-| `docs/MANCUSO_Santo_PW.pdf` | Relazione completa del Project Work. |
-| `docs/MANCUSO_Santo_Discussione_15min.pptx` | Presentazione di discussione (15 min). |
-| `docs/equity_factor_timing.pdf` | Paper/estratto sul factor timing di riferimento. |
-| `requirements.txt` | Dipendenze Python pinnate alle versioni usate per i risultati. |
-| `pyproject.toml` | Metadati del progetto e configurazione di `ruff`/`pytest`. |
-| `.pre-commit-config.yaml` | Hook anti-segreto e di lint eseguiti prima di ogni commit. |
-| `.github/workflows/ci.yml` | CI GitHub Actions: lint e test a ogni push/PR. |
+| `Code/equity_factor_timing_final.ipynb` | **Main notebook**: the full pipeline in 3 parts (regimes → factors → portfolio). The project's entry point. |
+| `src/paths.py` | Project roots (`PROJECT_ROOT`, `DATA_DIR`, `MODELS_DIR`) independent of the working directory. |
+| `src/metrics.py` | Performance metrics computed **from returns** (imported by the notebook as `pm`). |
+| `src/equity_metrics.py` | Variant of the same metrics computed **from the equity curve**. |
+| `src/turbulence.py` | Kritzman-Li **financial turbulence** index (a feature of the regime classifier). |
+| `tests/` | `pytest` suite for the metrics and turbulence modules. |
+| `Code/best_ho_model_new2.pkl` | **Stage 1** model (HyperOpt-tuned stacking) for market regime classification. |
+| `Code/best_rf_model_new2.pkl` | Baseline Random Forest for regime classification. |
+| `Code/best_normal_factors_new2.pkl` | **Stage 2** model for winning-factor selection in the *normal* regime. |
+| `Code/best_correction_factors_new2.pkl` | **Stage 2** model for winning-factor selection in the *correction* regime. |
+| `Data/SP500.xlsx` | S&P 500 index price history. |
+| `Data/S&P_factors.xlsx` | Price history of the 6 S&P 500 factor indices. |
+| `Data/S&P_sectors_bb.xlsx` | S&P sector price history (input to the financial turbulence index). |
+| `Data/Data_Treasuries.xlsx` | US Treasury yields at 1, 2 and 10 years. |
+| `Data/Data_Macro.xlsx` | Macroeconomic variables used as regime-classifier features. |
+| `docs/METHODOLOGY.md` | Technical summary of the methodology (pipeline diagram, features, metrics). |
+| `docs/MANCUSO_Santo_PW.pdf` | Full Project Work report (in Italian). |
+| `docs/MANCUSO_Santo_Discussione_15min.pptx` | Discussion slides, 15 min (in Italian). |
+| `docs/equity_factor_timing.pdf` | Reference paper/extract on factor timing. |
+| `requirements.txt` | Python dependencies pinned to the versions used to produce the results. |
+| `pyproject.toml` | Project metadata and `ruff`/`pytest` configuration. |
+| `.pre-commit-config.yaml` | Secret-scanning and lint hooks run before every commit. |
+| `.github/workflows/ci.yml` | GitHub Actions CI: lint and tests on every push/PR. |
 
-## Note / Vincoli
+## Notes / Constraints
 
-- **Ordine di esecuzione**: il notebook è **stateful**. Esegui le celle dall'alto verso il basso; saltarne alcune lascia variabili non definite.
-- **Percorsi**: gestiti da `src/paths.py` in modo indipendente dalla cartella di avvio; i dati restano in `Data/`, i modelli `.pkl` in `Code/`. Il notebook aggiunge automaticamente la radice del progetto a `sys.path` per importare `src`.
-- **Dati con licenza**: i file in `Data/` derivano da **Refinitiv Eikon / S&P / Bloomberg**. Sono inclusi per riproducibilità didattica; verifica i termini di licenza prima di riutilizzarli o ridistribuirli in altri contesti.
-- **Ambiente**: ricrea l'ambiente con `requirements.txt`; non versionare il virtualenv (è già escluso in `.gitignore`).
-- **Riproducibilità dei modelli**: i `.pkl` riflettono l'addestramento originale. Riaddestrando (rimuovendo `%%skip`) i risultati numerici possono variare leggermente per via di seed e versioni delle librerie.
+- **Execution order**: the notebook is **stateful**. Run the cells top to bottom; skipping some leaves variables undefined.
+- **Paths**: handled by `src/paths.py` independently of the working directory; data stays in `Data/`, the `.pkl` models in `Code/`. The notebook automatically adds the project root to `sys.path` so that `src` can be imported.
+- **Licensed data**: the files in `Data/` are derived from **Refinitiv Eikon / S&P / Bloomberg**. They are included for educational reproducibility; check the licence terms before reusing or redistributing them in other contexts.
+- **Environment**: recreate the environment from `requirements.txt`; do not version the virtualenv (it is already excluded in `.gitignore`).
+- **Model reproducibility**: the `.pkl` files reflect the original training run. Retraining (by removing `%%skip`) may shift the numeric results slightly because of seeds and library versions.
 
-## Crediti / Provenienza
+## Credits / Provenance
 
-- **Autore**: Santo Mancuso.
-- **Contesto**: Project Work del **Master in Finance**, Politecnico di Milano, Graduate School of Management (GSOM).
-- **Anno**: 2024.
-- **Dati**: Refinitiv Eikon, indici S&P 500 (prezzo, fattori, settori), Treasury USA, variabili macroeconomiche.
-- **Licenza**: codice rilasciato sotto licenza **MIT** (vedi `LICENSE`). I dati di mercato restano soggetti alle licenze dei rispettivi fornitori.
+- **Author**: Santo Mancuso.
+- **Context**: Project Work for the **Master in Finance**, Politecnico di Milano, Graduate School of Management (GSOM).
+- **Year**: 2024.
+- **Data**: Refinitiv Eikon, S&P 500 indices (price, factors, sectors), US Treasuries, macroeconomic variables.
+- **Licence**: code released under the **MIT** licence (see `LICENSE`). Market data remains subject to the licences of the respective providers.
