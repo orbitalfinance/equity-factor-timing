@@ -1,88 +1,89 @@
-# Metodologia
+**English** | [Italiano](METHODOLOGY.it.md)
 
-Sintesi tecnica della pipeline di **Equity Factor Timing**. Per il dettaglio
-completo vedi la relazione in [MANCUSO_Santo_PW.pdf](MANCUSO_Santo_PW.pdf); per
-l'esecuzione passo-passo vedi il notebook in `Code/`.
+# Methodology
 
-## Schema della pipeline
+Technical summary of the **Equity Factor Timing** pipeline. For the full detail
+see the report in [MANCUSO_Santo_PW.pdf](MANCUSO_Santo_PW.pdf) (in Italian); for
+the step-by-step run see the notebook in `Code/`.
+
+## Pipeline diagram
 
 ```
-                 Parte 1                     Parte 2                    Parte 3
+                  Part 1                      Part 2                     Part 3
         +-----------------------+   +----------------------+   +---------------------+
-Dati -> | Regimi di mercato     |-> | Selezione fattori    |-> | Simulazione         |
-        | (2 stadi ML)          |   | (per regime)         |   | di portafoglio      |
+Data -> | Market regimes        |-> | Factor selection     |-> | Portfolio           |
+        | (2-stage ML)          |   | (per regime)         |   | simulation          |
         +-----------------------+   +----------------------+   +---------------------+
           |                           |                          |
-   K-means su drawdown         Random Forest per            Pesi = probabilita' dei
-   + classificatore su         regime "normale" e           fattori; ribilancio
-   macro/turbolenza            "correzione"                 mensile; metriche vs
-                                                            benchmark
+   K-means on drawdowns        Random Forest for            Weights = factor
+   + classifier on             "normal" and                 probabilities; monthly
+   macro/turbulence            "correction" regimes         rebalancing; metrics vs
+                                                            benchmarks
 ```
 
-## Parte 1: regimi di rischio del mercato
+## Part 1: market risk regimes
 
-Approccio a **due stadi**:
+A **two-stage** approach:
 
-1. **Etichettatura non supervisionata.** Si calcola il drawdown rolling a 3 mesi
-   dell'S&P 500 e lo si aggrega a frequenza mensile. Un **K-means** (numero di
-   cluster scelto con *elbow method* e *silhouette score*) separa i mesi in
-   regimi. Nella configurazione principale i regimi sono due: **normale** e
-   **correzione**.
-2. **Classificazione supervisionata.** Un classificatore impara a prevedere il
-   regime del mese a partire dalle feature descritte sotto. Si confrontano
-   **Random Forest**, **Gaussian Naive Bayes** e **SVC**, combinati in uno
-   **StackingClassifier** i cui iper-parametri sono ottimizzati con **HyperOpt**
-   (validazione temporale con `TimeSeriesSplit`). Le classi sbilanciate sono
-   gestite con **SMOTE**.
+1. **Unsupervised labelling.** The S&P 500's 3-month rolling drawdown is computed
+   and aggregated to monthly frequency. A **K-means** model (number of clusters
+   chosen via the *elbow method* and *silhouette score*) separates months into
+   regimes. In the main configuration there are two regimes: **normal** and
+   **correction**.
+2. **Supervised classification.** A classifier learns to predict the month's
+   regime from the features described below. **Random Forest**, **Gaussian Naive
+   Bayes** and **SVC** are compared and combined into a **StackingClassifier**
+   whose hyper-parameters are tuned with **HyperOpt** (temporal validation via
+   `TimeSeriesSplit`). Class imbalance is handled with **SMOTE**.
 
-### Feature del classificatore di regime
+### Regime classifier features
 
-- **Turbolenza finanziaria** (indice di Kritzman-Li): distanza di Mahalanobis del
-  vettore di rendimenti settoriali/treasury rispetto alla media storica. Vedi
+- **Financial turbulence** (Kritzman-Li index): Mahalanobis distance of the
+  sector/treasury return vector from its historical mean. See
   `src/turbulence.py`.
-- **Variabili macroeconomiche** (da `Data/Data_Macro.xlsx`), rese stazionarie
-  dove necessario e verificate con il test **Augmented Dickey-Fuller**.
-- I dati sono scalati con **Min-Max** e la selezione delle feature usa
-  **Random Forest importance** e **mutual information**.
+- **Macroeconomic variables** (from `Data/Data_Macro.xlsx`), made stationary
+  where needed and checked with the **Augmented Dickey-Fuller** test.
+- Data is scaled with **Min-Max**, and feature selection uses **Random Forest
+  importance** and **mutual information**.
 
-## Parte 2: selezione dei fattori
+## Part 2: factor selection
 
-Sei fattori azionari S&P 500: **value, growth, momentum, low-volatility,
-quality, small-cap**. Per ogni mese il fattore "vincente" e' quello a rendimento
-massimo; l'etichetta e' **one-hot**. Si addestrano **due Random Forest separati**,
-uno per il regime *normale* e uno per il regime di *correzione*, ciascuno
-produce le **probabilita'** che ogni fattore sia il vincente del mese successivo.
-Lo split e' temporale (train fino al 2010, test dal 2010).
+Six S&P 500 equity factors: **value, growth, momentum, low-volatility, quality,
+small-cap**. For each month the "winning" factor is the one with the highest
+return; the label is **one-hot**. **Two separate Random Forests** are trained,
+one for the *normal* regime and one for the *correction* regime, each producing
+the **probabilities** that a given factor will be next month's winner. The split
+is temporal (train up to 2010, test from 2010 onwards).
 
-## Parte 3: simulazione di portafoglio
+## Part 3: portfolio simulation
 
-Le probabilita' dei fattori diventano i **pesi** di un portafoglio ribilanciato
-mensilmente (le probabilita' sono ritardate di un periodo per evitare
-look-ahead). Si costruiscono e confrontano piu' strategie:
+The factor probabilities become the **weights** of a monthly-rebalanced
+portfolio (the probabilities are lagged by one period to avoid look-ahead).
+Several strategies are built and compared:
 
-- Portafoglio **factor-timing** guidato dalle probabilita' (6 fattori).
-- **Equally-weighted** sui fattori.
+- **Factor-timing** portfolio driven by the probabilities (6 factors).
+- **Equally-weighted** across the factors.
 - **Risk-parity** (via `Riskfolio-Lib`).
-- Benchmark **S&P 500** buy-and-hold.
+- **S&P 500** buy-and-hold benchmark.
 
-### Metriche di valutazione
+### Evaluation metrics
 
-Calcolate su base mensile e giornaliera da `src/metrics.py`:
+Computed on a monthly and daily basis by `src/metrics.py`:
 
-| Metrica | Significato |
+| Metric | Meaning |
 | --- | --- |
-| `AnnRet` | Rendimento annualizzato |
-| `AnnVol` | Volatilita' annualizzata |
-| `Sharpe` | Rendimento per unita' di rischio |
-| `MaxDD` | Massima perdita da picco a valle |
-| `Calmar` | Rendimento annualizzato su massimo drawdown |
+| `AnnRet` | Annualised return |
+| `AnnVol` | Annualised volatility |
+| `Sharpe` | Return per unit of risk |
+| `MaxDD` | Maximum peak-to-trough loss |
+| `Calmar` | Annualised return over maximum drawdown |
 
-I valori numerici per ciascuna strategia sono prodotti dalle celle della Parte 3
-del notebook.
+The numeric values for each strategy are produced by the Part 3 cells of the
+notebook.
 
-## Note di riproducibilita'
+## Reproducibility notes
 
-- I modelli addestrati sono salvati in `Code/*.pkl` e ricaricati dal notebook;
-  le celle di training pesanti sono disattivate dal magic `%%skip`.
-- Riaddestrando (rimuovendo `%%skip`) i risultati possono variare leggermente per
-  seed e versioni delle librerie. Vedi `requirements.txt` per le versioni usate.
+- The trained models are stored in `Code/*.pkl` and reloaded by the notebook;
+  the heavy training cells are disabled by the `%%skip` magic.
+- Retraining (by removing `%%skip`) may shift the results slightly because of
+  seeds and library versions. See `requirements.txt` for the versions used.
