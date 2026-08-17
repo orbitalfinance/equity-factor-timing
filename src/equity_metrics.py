@@ -1,12 +1,30 @@
 """
 Performance metrics computed FROM AN EQUITY CURVE ``ce`` (monthly observations).
 
-Annualised return/volatility, Sharpe, max drawdown and Calmar. Kept for the
-parts of the analysis that work directly on an equity curve rather than on a
-return series (see ``metrics`` for the return-series variant).
+Annualised return/volatility, Sharpe, max drawdown and Calmar.
 
-Moved here from ``Code/performance_metrics.py`` during the src/ refactor;
-the public function names are unchanged.
+NOT USED BY THE NOTEBOOK. This is a faithful port of the original
+``Code/performance_metrics.py``, kept so the repository still carries the code
+as it was written for the Project Work. The analysis imports ``metrics``
+instead (as ``pm``) and works from return series throughout.
+
+It differs from ``metrics`` in three ways, all deliberate; please do not
+"fix" them without a reason:
+
+- ``max_drawdown`` takes the running peak over ``ce[0:i]``, excluding the
+  current point, where ``metrics`` uses ``cummax()``, which includes it. The
+  two agree on any curve that declines at least once — at a trough the peak is
+  always reached strictly earlier, so the excluded point never was the max.
+  They part only on a never-declining curve, where this version reports a
+  positive "drawdown" and ``metrics`` reports zero.
+- Annualisation is fixed at 12: this module is monthly-only by design, while
+  ``metrics`` takes a ``freq`` argument.
+- ``calmar_ratio`` has no zero-drawdown guard (``metrics`` returns ``inf``).
+  Unreachable in practice, for the same reason as above.
+
+The ``except ValueError`` branch in ``max_drawdown`` catches the empty-list
+case of a single-observation curve. It is written for a DataFrame ``ce`` and
+would raise ``IndexError`` on a Series; nothing currently calls it.
 """
 
 import numpy as np

@@ -5,7 +5,8 @@ Modules
 -------
 paths          : project paths resolved independently of the working directory.
 metrics        : performance metrics computed from a return series (used as `pm`).
-equity_metrics : the same metrics computed from an equity curve.
+equity_metrics : the same metrics computed from an equity curve. Faithful port of
+                 the original code, kept for reference; the notebook does not use it.
 turbulence     : Kritzman-Li financial turbulence index.
 """
 

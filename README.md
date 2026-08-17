@@ -52,8 +52,8 @@ The project rests on a **two-stage ML architecture**. *First stage*: an **unsupe
 | --- | --- |
 | `Code/equity_factor_timing_final.ipynb` | **Main notebook**: the full pipeline in 3 parts (regimes → factors → portfolio). The project's entry point. |
 | `src/paths.py` | Project roots (`PROJECT_ROOT`, `DATA_DIR`, `MODELS_DIR`) independent of the working directory. |
-| `src/metrics.py` | Performance metrics computed **from returns** (imported by the notebook as `pm`). |
-| `src/equity_metrics.py` | Variant of the same metrics computed **from the equity curve**. |
+| `src/metrics.py` | Performance metrics computed **from returns** (imported by the notebook as `pm`). This is the module the analysis actually uses. |
+| `src/equity_metrics.py` | The same metrics computed **from the equity curve**. Faithful port of the original Project Work code, kept for reference — **not used by the notebook**. |
 | `src/turbulence.py` | Kritzman-Li **financial turbulence** index (a feature of the regime classifier). |
 | `tests/` | `pytest` suite for the metrics and turbulence modules. |
 | `Code/best_ho_model_new2.pkl` | **Stage 1** model (HyperOpt-tuned stacking) for market regime classification. |
