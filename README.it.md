@@ -20,13 +20,13 @@ Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un mod
 ## Risultati in sintesi
 
 Tutti i valori qui sotto sono **out of sample**: i modelli sono addestrati sui
-dati fino a dicembre 2009 e valutati su **gennaio 2010 – marzo 2023** (159
+dati fino a dicembre 2009 e valutati **da gennaio 2010 a marzo 2023** (159
 mesi). Sono letti direttamente dalle celle di output del notebook; un nuovo
 addestramento può spostarli leggermente.
 
 ### Fase 1: regimi di mercato
 
-Il K-means sul drawdown mobile a 3 mesi dell'S&P 500 (1987–2023) individua
+Il K-means sul drawdown mobile a 3 mesi dell'S&P 500 (dal 1987 al 2023) individua
 **due regimi** tramite il silhouette score: circa il **77 % di mesi normali**
 e il **23 % di mesi di correzione**. La banda arancione segna il regime di
 correzione.
@@ -66,7 +66,7 @@ di un mese, diventano i pesi del portafoglio:
 
 ### Fase 3: portafoglio contro i benchmark
 
-Ribilanciamento mensile, rendimenti mensili, gennaio 2010 – marzo 2023.
+Ribilanciamento mensile, rendimenti mensili, da gennaio 2010 a marzo 2023.
 Rendimento, volatilità e drawdown in percentuale.
 
 | Strategia (mensile) | Rend. ann. | Vol. ann. | Sharpe | Max DD | Calmar |
@@ -94,7 +94,7 @@ tutto il mese) aggiunge un benchmark risk-parity costruito con Riskfolio-Lib:
 
 ### Cosa emerge
 
-- **Il factor timing batte l'S&P 500 su ogni metrica** nel 2010–2023:
+- **Il factor timing batte l'S&P 500 su ogni metrica** dal 2010 al 2023:
   rendimento più alto, circa un terzo di volatilità in meno sui dati mensili,
   Sharpe 1,04 contro 0,61 e drawdown massimo meno profondo.
 - **Concentrarsi sui due o tre fattori più probabili** migliora ancora un po'
@@ -145,7 +145,7 @@ tutto il mese) aggiunge un benchmark risk-parity costruito con Riskfolio-Lib:
 | `Code/equity_factor_timing_final.ipynb` | **Notebook principale**: pipeline completa in 3 parti (regimi → fattori → portafoglio). Entry point del progetto. |
 | `src/paths.py` | Radici del progetto (`PROJECT_ROOT`, `DATA_DIR`, `MODELS_DIR`) indipendenti dalla cartella di avvio. |
 | `src/metrics.py` | Metriche di performance **dai rendimenti** (importato dal notebook come `pm`). È il modulo che l'analisi usa davvero. |
-| `src/equity_metrics.py` | Le stesse metriche calcolate **dall'equity curve**. Port fedele del codice originale del Project Work, conservato come riferimento — **non usato dal notebook**. |
+| `src/equity_metrics.py` | Le stesse metriche calcolate **dall'equity curve**. Port fedele del codice originale del Project Work, conservato come riferimento. **Non usato dal notebook.** |
 | `src/turbulence.py` | Indice di **turbolenza finanziaria** di Kritzman-Li (feature del classificatore di regime). |
 | `tests/` | Suite `pytest` per metriche e turbolenza. |
 | `Code/best_ho_model_new2.pkl` | Modello di **stadio 1** (stacking ottimizzato con HyperOpt) per la classificazione del regime di mercato. |

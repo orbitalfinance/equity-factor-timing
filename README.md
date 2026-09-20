@@ -20,13 +20,13 @@ The project rests on a **two-stage ML architecture**. *First stage*: an **unsupe
 ## Results at a glance
 
 All figures below are **out of sample**: the models are trained on data up to
-December 2009 and evaluated on **January 2010 – March 2023** (159 months).
+December 2009 and evaluated on **January 2010 to March 2023** (159 months).
 They are read directly from the notebook's output cells; retraining may shift
 them slightly.
 
 ### Stage 1: market regimes
 
-K-means on the S&P 500's 3-month rolling drawdown (1987–2023) picks **two
+K-means on the S&P 500's 3-month rolling drawdown (1987 to 2023) picks **two
 regimes** by silhouette score: roughly **77 % normal** months and **23 %
 correction** months. The orange band marks the correction regime.
 
@@ -64,7 +64,7 @@ month, become the portfolio weights:
 
 ### Stage 3: portfolio versus benchmarks
 
-Monthly rebalancing, monthly returns, January 2010 – March 2023. Returns,
+Monthly rebalancing, monthly returns, January 2010 to March 2023. Returns,
 volatility and drawdown in percent.
 
 | Strategy (monthly) | Ann. return | Ann. vol. | Sharpe | Max DD | Calmar |
@@ -92,7 +92,7 @@ adds a risk-parity benchmark built with Riskfolio-Lib:
 
 ### Takeaways
 
-- **Factor timing beats the S&P 500 on every metric** over 2010–2023: higher
+- **Factor timing beats the S&P 500 on every metric** over 2010 to 2023: higher
   return, about one-third less volatility on monthly data, a Sharpe ratio of
   1.04 against 0.61, and a shallower maximum drawdown.
 - **Concentrating on the two or three most probable factors** improves the
@@ -143,7 +143,7 @@ adds a risk-parity benchmark built with Riskfolio-Lib:
 | `Code/equity_factor_timing_final.ipynb` | **Main notebook**: the full pipeline in 3 parts (regimes → factors → portfolio). The project's entry point. |
 | `src/paths.py` | Project roots (`PROJECT_ROOT`, `DATA_DIR`, `MODELS_DIR`) independent of the working directory. |
 | `src/metrics.py` | Performance metrics computed **from returns** (imported by the notebook as `pm`). This is the module the analysis actually uses. |
-| `src/equity_metrics.py` | The same metrics computed **from the equity curve**. Faithful port of the original Project Work code, kept for reference — **not used by the notebook**. |
+| `src/equity_metrics.py` | The same metrics computed **from the equity curve**. Faithful port of the original Project Work code, kept for reference. **Not used by the notebook.** |
 | `src/turbulence.py` | Kritzman-Li **financial turbulence** index (a feature of the regime classifier). |
 | `tests/` | `pytest` suite for the metrics and turbulence modules. |
 | `Code/best_ho_model_new2.pkl` | **Stage 1** model (HyperOpt-tuned stacking) for market regime classification. |
@@ -182,7 +182,7 @@ The two-stage architecture implemented here follows the approach proposed in:
 > https://www.pm-research.com/content/iijpormgmt/50/3
 
 The article is paywalled and its licence does not permit redistribution, so it
-is **not** included in this repository — please obtain it from the publisher.
+is **not** included in this repository. Please obtain it from the publisher.
 
 ## Credits / Provenance
 
