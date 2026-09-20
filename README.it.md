@@ -17,6 +17,98 @@ Un sistema che riconosce il **regime di rischio** del mercato e, in base ad esso
 
 Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un modello di **clustering non supervisionato** (K-means sui drawdown mensili a 3 mesi dell'S&P 500) etichetta ogni mese come regime *normale* o di *correzione*; un **classificatore supervisionato** (Random Forest / Naive Bayes / SVC combinati in uno **stacking** ottimizzato con **HyperOpt**) impara poi a prevedere quel regime a partire da variabili **macroeconomiche** e dalla **turbolenza finanziaria** di Kritzman-Li. *Secondo stadio*: per ciascun regime un **Random Forest dedicato** stima la probabilità che ogni fattore sia il *vincente* del mese successivo. Queste probabilità diventano i **pesi** di un portafoglio ribilanciato mensilmente, la cui equity curve viene misurata con rendimento annuo, volatilità, **Sharpe**, **max drawdown** e **Calmar** e confrontata con i benchmark. In breve: *prima capisci in che mondo sei, poi scegli lo stile giusto per quel mondo.*
 
+## Risultati in sintesi
+
+Tutti i valori qui sotto sono **out of sample**: i modelli sono addestrati sui
+dati fino a dicembre 2009 e valutati su **gennaio 2010 – marzo 2023** (159
+mesi). Sono letti direttamente dalle celle di output del notebook; un nuovo
+addestramento può spostarli leggermente.
+
+### Fase 1: regimi di mercato
+
+Il K-means sul drawdown mobile a 3 mesi dell'S&P 500 (1987–2023) individua
+**due regimi** tramite il silhouette score: circa il **77 % di mesi normali**
+e il **23 % di mesi di correzione**. La banda arancione segna il regime di
+correzione.
+
+![Drawdown dell'S&P 500 e regimi individuati dal clustering](docs/img/regimes.png)
+
+Il classificatore stacking (Random Forest + Naive Bayes + SVC, ottimizzato con
+HyperOpt) prevede il regime a partire dalle variabili macro e dalla turbolenza
+finanziaria. Le feature più informative sono il **CAPE**, i tre sotto-indici
+**NFCI** (risk, credit, leverage), la **turbolenza finanziaria**, i
+**non-farm payrolls** e l'**occupazione manifatturiera**.
+
+| Classificatore di regime (test set, 159 mesi) | Accuratezza | F1 (macro) | Recall correzione |
+| --- | ---: | ---: | ---: |
+| Random Forest di base | 0,87 | 0,79 | 0,51 |
+| **Stacking + HyperOpt (usato a valle)** | 0,82 | 0,73 | 0,49 |
+
+I mesi normali sono riconosciuti quasi sempre; **i mesi di correzione vengono
+colti circa una volta su due**. È il principale collo di bottiglia della
+pipeline.
+
+### Fase 2: fattore vincente per regime
+
+Una Random Forest per regime prevede quale dei sei fattori avrà il rendimento
+più alto il mese successivo (problema a 6 classi, livello casuale 17 %).
+
+| Modello dei fattori (test set) | Mesi | Accuratezza |
+| --- | ---: | ---: |
+| Regime normale | 122 | 0,59 |
+| Regime di correzione | 37 | 0,57 |
+
+Nel periodo di test il vincitore più frequente è stato **Quality** nei mesi
+normali e **Value** nei mesi di correzione. Le probabilità previste, ritardate
+di un mese, diventano i pesi del portafoglio:
+
+![Probabilità previste del fattore vincente](docs/img/factor_probabilities.png)
+
+### Fase 3: portafoglio contro i benchmark
+
+Ribilanciamento mensile, rendimenti mensili, gennaio 2010 – marzo 2023.
+Rendimento, volatilità e drawdown in percentuale.
+
+| Strategia (mensile) | Rend. ann. | Vol. ann. | Sharpe | Max DD | Calmar |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| **Factor timing, 6 fattori pesati per probabilità** | 11,3 | 10,8 | **1,04** | −17,9 | 0,63 |
+| Factor timing, 2 fattori migliori pesati per probabilità | 11,4 | 11,0 | 1,03 | −17,7 | 0,64 |
+| Factor timing, 2 fattori migliori equipesati | 11,9 | 10,9 | **1,09** | −17,1 | 0,70 |
+| 1/N sui 6 fattori (senza timing) | 10,3 | 11,2 | 0,92 | −19,4 | 0,53 |
+| S&P 500 buy-and-hold | 9,9 | 16,1 | 0,61 | −24,2 | 0,41 |
+
+![Rendimento cumulato di 1 $: S&P 500, 1/N sui fattori, fattori pesati per probabilità](docs/img/cumulative_returns_monthly.png)
+
+Lo stesso esercizio su rendimenti **giornalieri** (pesi mensili mantenuti per
+tutto il mese) aggiunge un benchmark risk-parity costruito con Riskfolio-Lib:
+
+| Strategia (giornaliera) | Rend. ann. | Vol. ann. | Sharpe | Max DD | Calmar |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Factor timing, 2 fattori migliori pesati per probabilità | 11,3 | 17,0 | **0,67** | −31,6 | 0,36 |
+| Factor timing, 6 fattori pesati per probabilità | 10,8 | 16,9 | 0,64 | −34,4 | 0,31 |
+| 1/N sui 6 fattori | 9,9 | 17,1 | 0,58 | −34,9 | 0,28 |
+| Risk parity sui 6 fattori | 9,6 | 16,7 | 0,58 | −34,6 | 0,28 |
+| S&P 500 buy-and-hold | 10,0 | 17,8 | 0,56 | −33,9 | 0,29 |
+
+![Rendimenti cumulati giornalieri: factor timing a 2 e 3 fattori contro S&P 500 e risk parity](docs/img/cumulative_returns_daily.png)
+
+### Cosa emerge
+
+- **Il factor timing batte l'S&P 500 su ogni metrica** nel 2010–2023:
+  rendimento più alto, circa un terzo di volatilità in meno sui dati mensili,
+  Sharpe 1,04 contro 0,61 e drawdown massimo meno profondo.
+- **Concentrarsi sui due o tre fattori più probabili** migliora ancora un po'
+  lo Sharpe e riduce il drawdown, sia su dati mensili sia giornalieri.
+- **Il vantaggio rispetto a un semplice paniere 1/N di fattori è contenuto.**
+  Un portafoglio long-short (lungo il portafoglio con timing, corto il paniere
+  equipesato) rende circa lo 0,25 % annuo con volatilità dell'1,6 %: gran
+  parte del vantaggio sull'indice viene dal detenere i fattori in sé, e il
+  timing aggiunge valore soprattutto nei drawdown.
+- **Il riconoscimento del regime è l'anello debole.** Solo circa la metà dei
+  mesi di correzione viene individuata in anticipo, e questo limita quanto la
+  seconda fase può aggiungere. Migliorare il classificatore è la direzione più
+  promettente.
+
 ## Come usarlo
 
 1. **Clona il repository e posizionati nella cartella.**

@@ -17,6 +17,96 @@ A system that identifies the market's **risk regime** and, based on it, picks **
 
 The project rests on a **two-stage ML architecture**. *First stage*: an **unsupervised clustering** model (K-means over the S&P 500's monthly 3-month drawdowns) labels each month as a *normal* or *correction* regime; a **supervised classifier** (Random Forest / Naive Bayes / SVC combined into a **stacking** model tuned with **HyperOpt**) then learns to predict that regime from **macroeconomic** variables and Kritzman-Li **financial turbulence**. *Second stage*: for each regime, a **dedicated Random Forest** estimates the probability that each factor will be next month's *winner*. Those probabilities become the **weights** of a monthly-rebalanced portfolio, whose equity curve is measured with annual return, volatility, **Sharpe**, **max drawdown** and **Calmar**, and compared against the benchmarks. In short: *first work out which world you are in, then pick the right style for that world.*
 
+## Results at a glance
+
+All figures below are **out of sample**: the models are trained on data up to
+December 2009 and evaluated on **January 2010 – March 2023** (159 months).
+They are read directly from the notebook's output cells; retraining may shift
+them slightly.
+
+### Stage 1: market regimes
+
+K-means on the S&P 500's 3-month rolling drawdown (1987–2023) picks **two
+regimes** by silhouette score: roughly **77 % normal** months and **23 %
+correction** months. The orange band marks the correction regime.
+
+![S&P 500 drawdown and clustered regimes](docs/img/regimes.png)
+
+The stacking classifier (Random Forest + Naive Bayes + SVC, tuned with
+HyperOpt) predicts the regime from macro variables and financial turbulence.
+The features that carry the most information are **CAPE**, the three **NFCI**
+sub-indices (risk, credit, leverage), **financial turbulence**, non-farm
+**payrolls** and **manufacturing employment**.
+
+| Regime classifier (test set, 159 months) | Accuracy | F1 (macro) | Correction recall |
+| --- | ---: | ---: | ---: |
+| Random Forest baseline | 0.87 | 0.79 | 0.51 |
+| **Stacking + HyperOpt (used downstream)** | 0.82 | 0.73 | 0.49 |
+
+Normal months are recognised almost always; **correction months are caught
+about half of the time**. This is the main bottleneck of the pipeline.
+
+### Stage 2: winning factor per regime
+
+One Random Forest per regime predicts which of the six factors will have the
+highest return next month (a 6-class problem, chance level 17 %).
+
+| Factor model (test set) | Months | Accuracy |
+| --- | ---: | ---: |
+| Normal regime | 122 | 0.59 |
+| Correction regime | 37 | 0.57 |
+
+In the test period **Quality** was the most frequent winner in normal months
+and **Value** in correction months. The predicted probabilities, lagged one
+month, become the portfolio weights:
+
+![Predicted winning-factor probabilities](docs/img/factor_probabilities.png)
+
+### Stage 3: portfolio versus benchmarks
+
+Monthly rebalancing, monthly returns, January 2010 – March 2023. Returns,
+volatility and drawdown in percent.
+
+| Strategy (monthly) | Ann. return | Ann. vol. | Sharpe | Max DD | Calmar |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| **Factor timing, 6 factors weighted by probability** | 11.3 | 10.8 | **1.04** | −17.9 | 0.63 |
+| Factor timing, top-2 factors weighted by probability | 11.4 | 11.0 | 1.03 | −17.7 | 0.64 |
+| Factor timing, top-2 factors equally weighted | 11.9 | 10.9 | **1.09** | −17.1 | 0.70 |
+| 1/N across the 6 factors (no timing) | 10.3 | 11.2 | 0.92 | −19.4 | 0.53 |
+| S&P 500 buy-and-hold | 9.9 | 16.1 | 0.61 | −24.2 | 0.41 |
+
+![Cumulative return of $1: S&P 500, 1/N factors, probability-weighted factors](docs/img/cumulative_returns_monthly.png)
+
+The same exercise on **daily** returns (monthly weights held for the month)
+adds a risk-parity benchmark built with Riskfolio-Lib:
+
+| Strategy (daily) | Ann. return | Ann. vol. | Sharpe | Max DD | Calmar |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Factor timing, top-2 factors weighted by probability | 11.3 | 17.0 | **0.67** | −31.6 | 0.36 |
+| Factor timing, 6 factors weighted by probability | 10.8 | 16.9 | 0.64 | −34.4 | 0.31 |
+| 1/N across the 6 factors | 9.9 | 17.1 | 0.58 | −34.9 | 0.28 |
+| Risk parity across the 6 factors | 9.6 | 16.7 | 0.58 | −34.6 | 0.28 |
+| S&P 500 buy-and-hold | 10.0 | 17.8 | 0.56 | −33.9 | 0.29 |
+
+![Daily cumulative returns: top-2 and top-3 factor timing vs S&P 500 and risk parity](docs/img/cumulative_returns_daily.png)
+
+### Takeaways
+
+- **Factor timing beats the S&P 500 on every metric** over 2010–2023: higher
+  return, about one-third less volatility on monthly data, a Sharpe ratio of
+  1.04 against 0.61, and a shallower maximum drawdown.
+- **Concentrating on the two or three most probable factors** improves the
+  Sharpe ratio a little further and reduces the drawdown, on both monthly and
+  daily data.
+- **The gain over a plain 1/N factor basket is modest.** A long-short
+  portfolio (long the timed portfolio, short the equal-weight basket) earns
+  about 0.25 % a year with 1.6 % volatility, so most of the edge versus the
+  index comes from holding factors at all, and the timing adds on top mainly
+  during drawdowns.
+- **Regime detection is the weak link.** Only about half of the correction
+  months are recognised in advance, which caps how much the second stage can
+  add. Improving the classifier is the most promising direction.
+
 ## How to use it
 
 1. **Clone the repository and change into it.**
@@ -66,6 +156,7 @@ The project rests on a **two-stage ML architecture**. *First stage*: an **unsupe
 | `Data/Data_Treasuries.xlsx` | US Treasury yields at 1, 2 and 10 years. |
 | `Data/Data_Macro.xlsx` | Macroeconomic variables used as regime-classifier features. |
 | `docs/METHODOLOGY.md` | Technical summary of the methodology (pipeline diagram, features, metrics). |
+| `docs/img/` | Figures exported from the notebook and embedded in the results section above. |
 | `docs/MANCUSO_Santo_PW.pdf` | Full Project Work report (in Italian). |
 | `docs/MANCUSO_Santo_Discussione_15min.pptx` | Discussion slides, 15 min (in Italian). |
 | `requirements.txt` | Python dependencies pinned to the versions used to produce the results. |

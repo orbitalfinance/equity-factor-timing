@@ -86,7 +86,8 @@ Calcolate su base mensile e giornaliera da `src/metrics.py`:
 | `Calmar` | Rendimento annualizzato su massimo drawdown |
 
 I valori numerici per ciascuna strategia sono prodotti dalle celle della Parte 3
-del notebook.
+del notebook e riassunti, insieme alle figure principali, nella sezione
+"Risultati in sintesi" del [README](../README.it.md#risultati-in-sintesi).
 
 ## Note di riproducibilita'
 
