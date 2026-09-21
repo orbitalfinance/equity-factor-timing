@@ -1,23 +1,26 @@
 **English** | [Italiano](README.it.md)
 
-# **Equity Factor Timing**: machine-learning-driven dynamic allocation across S&P 500 equity factors
+# **Equity Factor Timing**: ML dynamic allocation across S&P 500 equity factors
 
 [![CI](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml/badge.svg)](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml)
 
 A system that identifies the market's **risk regime** and, based on it, picks **which equity factor** (value, growth, momentum, low-volatility, quality, small-cap) to overweight, building a monthly-rebalanced portfolio benchmarked against classic alternatives.
 
-## What it is for
+## Purpose of the project
 
-- **Factor timing**: work out which equity style tends to win in each market phase, instead of betting on a single static factor.
-- **Market regime detection**: tell *normal* phases from *correction* phases using drawdowns and macroeconomic variables.
+- **Market regime detection**: differentiate *normal* phases from *correction* phases using drawdowns and macroeconomic variables.
+- **Factor timing**: identify which equity style tends to win in each market phase, instead of betting on a single static factor.
 - **Strategy backtesting**: compare a *factor-timing* portfolio against S&P 500 buy-and-hold, equally-weighted and risk-parity, using standardised performance metrics.
-- **Research / teaching base**: an end-to-end pipeline (data → clustering → classification → allocation → backtest) that is reusable and inspectable in a single notebook.
 
 ## Core idea (read this first)
 
-The project rests on a **two-stage ML architecture**. *First stage*: an **unsupervised clustering** model (K-means over the S&P 500's monthly 3-month drawdowns) labels each month as a *normal* or *correction* regime; a **supervised classifier** (Random Forest / Naive Bayes / SVC combined into a **stacking** model tuned with **HyperOpt**) then learns to predict that regime from **macroeconomic** variables and Kritzman-Li **financial turbulence**. *Second stage*: for each regime, a **dedicated Random Forest** estimates the probability that each factor will be next month's *winner*. Those probabilities become the **weights** of a monthly-rebalanced portfolio, whose equity curve is measured with annual return, volatility, **Sharpe**, **max drawdown** and **Calmar**, and compared against the benchmarks. In short: *first work out which world you are in, then pick the right style for that world.*
+The project rests on a **two-stage ML architecture**. 
 
-## Results at a glance
+> *First stage*: an **unsupervised clustering** model (K-means over the S&P 500's 3-month drawdowns) labels each month as a *normal* or *correction* regime; a **supervised classifier** (Random Forest / Naive Bayes / SVC combined into a **stacking** model tuned with **HyperOpt**) then learns to predict that regime from **macroeconomic** variables and Kritzman-Li **financial turbulence**.
+> *Second stage*: for each regime, a **dedicated Random Forest** estimates the probability that each factor will be next month's *winner*. Those probabilities become the **weights** of a monthly-rebalanced portfolio, whose equity curve is measured with annual return, volatility, **Sharpe** ratio, **max drawdown** and **Calmar** ratio, and compared against the benchmarks.
+
+
+## Results
 
 All figures below are **out of sample**: the models are trained on data up to
 December 2009 and evaluated on **January 2010 to March 2023** (159 months).
@@ -128,12 +131,6 @@ adds a risk-parity benchmark built with Riskfolio-Lib:
    ```
    Run the cells in order: the heavier *training* sections are disabled by the `%%skip` magic and the already-trained models are reloaded from the `.pkl` files. To retrain from scratch, remove `%%skip` from the relevant cells. All required data is already included in `Data/`.
 
-4. **(Optional) Development: tests, lint and secret-scanning hooks.**
-   ```bash
-   pip install -e ".[dev]"
-   pytest -q                 # runs the suite in tests/
-   ruff check src tests      # lint + import sorting
-   pre-commit install        # blocks secrets and oversized files on every commit
    ```
 
 ### Repository map
