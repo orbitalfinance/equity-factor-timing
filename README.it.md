@@ -1,23 +1,26 @@
 [English](README.md) | **Italiano**
 
-# **Equity Factor Timing**: allocazione dinamica tra fattori azionari S&P 500 guidata da algoritmi di Machine Learning
+# **Equity Factor Timing**: allocazione dinamica ML tra fattori azionari S&P 500
 
 [![CI](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml/badge.svg)](https://github.com/orbitalfinance/equity-factor-timing/actions/workflows/ci.yml)
 
 Un sistema che riconosce il **regime di rischio** del mercato e, in base ad esso, sceglie **quale fattore azionario** (value, growth, momentum, low-volatility, quality, small-cap) sovrappesare, costruendo un portafoglio ribilanciato mensilmente e confrontato con benchmark classici.
 
-## A cosa serve
+## Scopo del progetto
 
-- **Timing dei fattori**: capire quale stile azionario tende a vincere in ciascuna fase di mercato, invece di puntare su un solo fattore statico.
 - **Rilevamento dei regimi di mercato**: distinguere fasi *normali* da fasi di *correzione* a partire dai drawdown e da variabili macro.
+- **Timing dei fattori**: individuare quale stile azionario tende a vincere in ciascuna fase di mercato, invece di puntare su un solo fattore statico.
 - **Backtest di strategie**: confrontare un portafoglio *factor-timing* con S&P 500 buy-and-hold, equally-weighted e risk-parity, con metriche di performance standardizzate.
-- **Base di ricerca / didattica**: pipeline end-to-end (dati → clustering → classificazione → allocazione → backtest) riutilizzabile e ispezionabile in un unico notebook.
 
 ## Idea centrale (leggere prima)
 
-Il progetto poggia su un'**architettura ML a due stadi**. *Primo stadio*: un modello di **clustering non supervisionato** (K-means sui drawdown mensili a 3 mesi dell'S&P 500) etichetta ogni mese come regime *normale* o di *correzione*; un **classificatore supervisionato** (Random Forest / Naive Bayes / SVC combinati in uno **stacking** ottimizzato con **HyperOpt**) impara poi a prevedere quel regime a partire da variabili **macroeconomiche** e dalla **turbolenza finanziaria** di Kritzman-Li. *Secondo stadio*: per ciascun regime un **Random Forest dedicato** stima la probabilità che ogni fattore sia il *vincente* del mese successivo. Queste probabilità diventano i **pesi** di un portafoglio ribilanciato mensilmente, la cui equity curve viene misurata con rendimento annuo, volatilità, **Sharpe**, **max drawdown** e **Calmar** e confrontata con i benchmark. In breve: *prima capisci in che mondo sei, poi scegli lo stile giusto per quel mondo.*
+Il progetto poggia su un'**architettura ML a due stadi**.
 
-## Risultati in sintesi
+> *Primo stadio*: un modello di **clustering non supervisionato** (K-means sui drawdown a 3 mesi dell'S&P 500) etichetta ogni mese come regime *normale* o di *correzione*; un **classificatore supervisionato** (Random Forest / Naive Bayes / SVC combinati in uno **stacking** ottimizzato con **HyperOpt**) impara poi a prevedere quel regime a partire da variabili **macroeconomiche** e dalla **turbolenza finanziaria** di Kritzman-Li.
+> *Secondo stadio*: per ciascun regime un **Random Forest dedicato** stima la probabilità che ogni fattore sia il *vincente* del mese successivo. Queste probabilità diventano i **pesi** di un portafoglio ribilanciato mensilmente, la cui equity curve viene misurata con rendimento annuo, volatilità, indice di **Sharpe**, **max drawdown** e indice di **Calmar** e confrontata con i benchmark.
+
+
+## Risultati
 
 Tutti i valori qui sotto sono **out of sample**: i modelli sono addestrati sui
 dati fino a dicembre 2009 e valutati **da gennaio 2010 a marzo 2023** (159
@@ -129,14 +132,6 @@ tutto il mese) aggiunge un benchmark risk-parity costruito con Riskfolio-Lib:
    jupyter lab Code/equity_factor_timing_final.ipynb
    ```
    Esegui le celle in ordine: le sezioni di *training* più pesanti sono disattivate dal magic `%%skip` e i modelli già addestrati vengono ricaricati dai file `.pkl`. Per riaddestrare da zero, rimuovi `%%skip` dalle celle interessate. I dati necessari sono già inclusi in `Data/`.
-
-4. **(Opzionale) Sviluppo: test, lint e hook anti-segreto.**
-   ```bash
-   pip install -e ".[dev]"
-   pytest -q                 # esegue la suite in tests/
-   ruff check src tests      # lint + ordinamento import
-   pre-commit install        # blocca segreti e file troppo grandi a ogni commit
-   ```
 
 ### Mappa del repository
 

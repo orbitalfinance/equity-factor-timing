@@ -131,8 +131,6 @@ adds a risk-parity benchmark built with Riskfolio-Lib:
    ```
    Run the cells in order: the heavier *training* sections are disabled by the `%%skip` magic and the already-trained models are reloaded from the `.pkl` files. To retrain from scratch, remove `%%skip` from the relevant cells. All required data is already included in `Data/`.
 
-   ```
-
 ### Repository map
 
 | File / folder | Purpose |

@@ -86,7 +86,7 @@ Computed on a monthly and daily basis by `src/metrics.py`:
 
 The numeric values for each strategy are produced by the Part 3 cells of the
 notebook and summarised, together with the key figures, in the
-"Results at a glance" section of the [README](../README.md#results-at-a-glance).
+"Results" section of the [README](../README.md#results).
 
 ## Reproducibility notes
 

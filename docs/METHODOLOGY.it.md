@@ -87,7 +87,7 @@ Calcolate su base mensile e giornaliera da `src/metrics.py`:
 
 I valori numerici per ciascuna strategia sono prodotti dalle celle della Parte 3
 del notebook e riassunti, insieme alle figure principali, nella sezione
-"Risultati in sintesi" del [README](../README.it.md#risultati-in-sintesi).
+"Risultati" del [README](../README.it.md#risultati).
 
 ## Note di riproducibilita'
 
