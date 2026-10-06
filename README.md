@@ -17,12 +17,13 @@ A system that identifies the market's **risk regime** and, based on it, picks **
 The project rests on a **two-stage ML architecture**. 
 
 > *First stage*: an **unsupervised clustering** model (K-means over the S&P 500's 3-month drawdowns) labels each month as a *normal* or *correction* regime; a **supervised classifier** (Random Forest / Naive Bayes / SVC combined into a **stacking** model tuned with **HyperOpt**) then learns to predict that regime from **macroeconomic** variables and Kritzman-Li **financial turbulence**.
+
 > *Second stage*: for each regime, a **dedicated Random Forest** estimates the probability that each factor will be next month's *winner*. Those probabilities become the **weights** of a monthly-rebalanced portfolio, whose equity curve is measured with annual return, volatility, **Sharpe** ratio, **max drawdown** and **Calmar** ratio, and compared against the benchmarks.
 
 
 ## Results
 
-All figures below are **out of sample**: the models are trained on data up to
+The models are trained on data up to
 December 2009 and evaluated on **January 2010 to March 2023** (159 months).
 They are read directly from the notebook's output cells; retraining may shift
 them slightly.
