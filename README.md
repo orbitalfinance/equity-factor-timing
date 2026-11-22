@@ -183,7 +183,6 @@ is **not** included in this repository. Please obtain it from the publisher.
 ## Credits / Provenance
 
 - **Author**: Santo Mancuso.
-- **Context**: Project Work for the **Master in Finance**, Politecnico di Milano, Graduate School of Management (GSOM).
 - **Year**: 2024.
 - **Data**: Refinitiv Eikon, S&P 500 indices (price, factors, sectors), US Treasuries, macroeconomic variables.
 - **Licence**: code released under the **MIT** licence (see `LICENSE`). Market data remains subject to the licences of the respective providers.
