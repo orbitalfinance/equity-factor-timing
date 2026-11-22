@@ -183,7 +183,6 @@ ridistribuzione: **non** è incluso in questo repository, va richiesto all'edito
 ## Crediti / Provenienza
 
 - **Autore**: Santo Mancuso.
-- **Contesto**: Project Work del **Master in Finance**, Politecnico di Milano, Graduate School of Management (GSOM).
 - **Anno**: 2024.
 - **Dati**: Refinitiv Eikon, indici S&P 500 (prezzo, fattori, settori), Treasury USA, variabili macroeconomiche.
 - **Licenza**: codice rilasciato sotto licenza **MIT** (vedi `LICENSE`). I dati di mercato restano soggetti alle licenze dei rispettivi fornitori.
